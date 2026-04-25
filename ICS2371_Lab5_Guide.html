@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICS 2371 — Lab 5: Arrays and Array Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:#16a34a;--green-l:#dcfce7;--green-d:#14532d;
+    --blue:#2563eb;--blue-l:#dbeafe;
+    --amber:#d97706;--amber-l:#fef3c7;
+    --red:#dc2626;--red-l:#fee2e2;
+    --purple:#7c3aed;--purple-l:#ede9fe;
+    --teal:#0d9488;--teal-l:#ccfbf1;
+    --ink:#1a1a2e;--muted:#64748b;--border:#e2e8f0;--surface:#f8fafc;--white:#ffffff;
+    --radius:12px;--mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:#f0fdf4;color:var(--ink);line-height:1.7;}
+  .hero{background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#047857 100%);color:white;padding:48px 24px 56px;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,0.07) 0%,transparent 60%);}
+  .hero-inner{max-width:860px;margin:0 auto;position:relative;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:999px;padding:4px 14px;font-size:13px;font-weight:600;letter-spacing:.04em;margin-bottom:20px;}
+  .hero-badge span{width:8px;height:8px;border-radius:50%;background:#6ee7b7;display:inline-block;}
+  h1{font-family:'Sora',sans-serif;font-size:clamp(26px,5vw,42px);font-weight:800;line-height:1.15;margin-bottom:12px;}
+  h1 em{font-style:normal;color:#6ee7b7;}
+  .hero-sub{font-size:17px;opacity:.85;max-width:540px;margin-bottom:32px;}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:16px;}
+  .meta-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px 14px;font-size:14px;font-weight:600;}
+  .nav-bar{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+  .nav-inner{max-width:860px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none;}
+  .nav-inner::-webkit-scrollbar{display:none;}
+  .tab{padding:16px 20px;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:7px;}
+  .tab:hover{color:var(--teal);}
+  .tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+  .tab-dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.5;}
+  .tab.active .tab-dot{opacity:1;}
+  main{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  .section{display:none;}
+  .section.active{display:block;animation:fadeUp .3s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .section-title{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+  .section-title .num{width:34px;height:34px;border-radius:8px;background:var(--teal);color:white;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+  .card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+  .card-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:9px;}
+  p{margin-bottom:12px;font-size:15px;}
+  ul,ol{margin-left:20px;margin-bottom:12px;font-size:15px;}
+  li{margin-bottom:6px;}
+  .info-box{border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;border-left:4px solid;font-size:14px;}
+  .info-box.note{background:var(--blue-l);border-color:var(--blue);color:#1e3a5f;}
+  .info-box.warn{background:var(--amber-l);border-color:var(--amber);color:#78350f;}
+  .info-box.tip{background:var(--green-l);border-color:var(--green);color:var(--green-d);}
+  .info-box.danger{background:var(--red-l);border-color:var(--red);color:#7f1d1d;}
+  .info-box strong{display:block;margin-bottom:4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;}
+  pre{background:#0f172a;border-radius:10px;padding:20px;overflow-x:auto;margin-bottom:16px;}
+  pre code{font-family:var(--mono);font-size:13px;color:#e2e8f0;line-height:1.7;}
+  .code-label{font-family:var(--mono);font-size:11px;color:#94a3b8;background:#1e293b;border-radius:6px 6px 0 0;padding:8px 16px;display:block;margin-bottom:-4px;border-bottom:1px solid #334155;}
+  .kw{color:#c084fc;}.str{color:#86efac;}.com{color:#64748b;font-style:italic;}.var{color:#7dd3fc;}.num{color:#fbbf24;}.fn{color:#f472b6;}
+  .task-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:24px;overflow:hidden;}
+  .task-header{padding:18px 24px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .15s;}
+  .task-header:hover{background:var(--surface);}
+  .task-num{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:18px;font-weight:800;flex-shrink:0;}
+  .task-num.t1{background:#ccfbf1;color:#134e4a;}
+  .task-num.t2{background:#dbeafe;color:#1e40af;}
+  .task-num.t3{background:#fef3c7;color:#92400e;}
+  .task-num.t4{background:#dcfce7;color:#14532d;}
+  .task-meta{flex:1;}
+  .task-name{font-family:'Sora',sans-serif;font-weight:700;font-size:16px;}
+  .task-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+  .task-marks{font-family:'Sora',sans-serif;font-weight:700;font-size:20px;color:var(--teal);}
+  .task-marks span{font-size:12px;color:var(--muted);font-weight:600;}
+  .chevron{font-size:20px;color:var(--muted);transition:transform .2s;}
+  .task-body{padding:24px;display:none;}
+  .task-body.open{display:block;}
+  .task-header.open .chevron{transform:rotate(180deg);}
+  .obj-list{list-style:none;margin-left:0;}
+  .obj-list li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);font-size:15px;}
+  .obj-list li:last-child{border-bottom:none;}
+  .obj-list .check{width:22px;height:22px;border-radius:50%;background:var(--teal-l);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px;}
+  .rubric-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .rubric-table th{background:var(--ink);color:white;padding:12px 16px;text-align:left;font-family:'Sora',sans-serif;font-weight:600;font-size:13px;}
+  .rubric-table th:last-child{text-align:center;}
+  .rubric-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .rubric-table tr:hover td{background:var(--surface);}
+  .rubric-table .marks-cell{text-align:center;font-weight:700;font-size:17px;font-family:'Sora',sans-serif;color:var(--teal);}
+  .rubric-section-head td{background:var(--surface);font-family:'Sora',sans-serif;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:10px 16px;}
+  .total-row td{border-top:2px solid var(--ink);font-weight:700;font-size:16px;}
+  .total-row .marks-cell{font-size:22px;color:var(--green);}
+  .step-list{counter-reset:steps;list-style:none;margin-left:0;}
+  .step-item{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;}
+  .step-num{width:36px;height:36px;border-radius:50%;background:var(--teal);color:white;font-family:'Sora',sans-serif;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step-content{flex:1;}
+  .step-content strong{display:block;font-family:'Sora',sans-serif;font-size:15px;margin-bottom:4px;}
+  .step-content p{font-size:14px;margin:0;color:#334155;}
+  .cmd{display:inline-flex;align-items:center;background:#0f172a;color:#86efac;font-family:var(--mono);font-size:13px;padding:10px 16px;border-radius:8px;margin:8px 0;width:100%;cursor:pointer;position:relative;user-select:all;}
+  .cmd:hover{background:#1e293b;}
+  .cmd .copy-hint{position:absolute;right:12px;font-size:11px;color:#64748b;font-family:'Nunito',sans-serif;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:600px){.cheat-grid{grid-template-columns:1fr;}}
+  .cta-btn{display:inline-flex;align-items:center;gap:10px;background:var(--teal);color:white;padding:14px 28px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:15px;text-decoration:none;transition:all .2s;border:none;cursor:pointer;}
+  .cta-btn:hover{background:#0f766e;transform:translateY(-1px);box-shadow:0 4px 16px rgba(13,148,136,0.3);}
+  .cta-btn.green{background:var(--green);}
+  .cta-btn.green:hover{background:#15803d;}
+  .checklist{list-style:none;margin-left:0;}
+  .checklist li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:15px;cursor:pointer;user-select:none;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:13px;}
+  .checklist li.checked .box{background:var(--teal);border-color:var(--teal);color:white;}
+  .checklist li.checked span{text-decoration:line-through;color:var(--muted);}
+  .progress-wrap{background:var(--border);border-radius:999px;height:8px;margin-bottom:8px;overflow:hidden;}
+  .progress-bar{height:100%;background:var(--teal);border-radius:999px;transition:width .4s ease;}
+  .progress-label{font-size:13px;color:var(--muted);text-align:right;}
+  .footer{background:var(--ink);color:rgba(255,255,255,0.6);text-align:center;padding:28px 20px;font-size:13px;}
+  .footer strong{color:white;}
+  .alert-box{background:#fef2f2;border:2px solid #fca5a5;border-radius:10px;padding:16px 20px;margin-bottom:16px;font-size:14px;color:#7f1d1d;}
+  .alert-box strong{color:#dc2626;font-family:'Sora',sans-serif;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span></span> ICS 2371 · Structured Programming · JKUAT</div>
+    <h1>Lab 5: <em>Arrays & Array Operations</em></h1>
+    <p class="hero-sub">Indexed arrays, associative arrays, built-in functions, bubble sort, linear search, and engineering data analysis. Week 5 of 14.</p>
+    <div class="hero-meta">
+      <div class="meta-pill">⏱ 2 hours</div>
+      <div class="meta-pill">🏆 25 marks total</div>
+      <div class="meta-pill">📋 4 tasks</div>
+      <div class="meta-pill">📅 Submit within 48 hrs</div>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="tab active" onclick="showTab('overview')"><span class="tab-dot"></span>Overview</button>
+    <button class="tab" onclick="showTab('tasks')"><span class="tab-dot"></span>Tasks</button>
+    <button class="tab" onclick="showTab('submit')"><span class="tab-dot"></span>How to Submit</button>
+    <button class="tab" onclick="showTab('rubric')"><span class="tab-dot"></span>Rubric</button>
+    <button class="tab" onclick="showTab('cheatsheet')"><span class="tab-dot"></span>PHP Quick Ref</button>
+    <button class="tab" onclick="showTab('checklist')"><span class="tab-dot"></span>My Checklist</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- OVERVIEW -->
+<div class="section active" id="section-overview">
+  <div class="section-title"><div class="num">1</div>Lab Overview</div>
+  <div class="card">
+    <div class="card-title">🎯 Learning Objectives</div>
+    <ul class="obj-list">
+      <li><span class="check">✓</span>Define an array and explain why arrays are essential in structured programming</li>
+      <li><span class="check">✓</span>Declare, initialise, and access indexed and associative arrays in PHP</li>
+      <li><span class="check">✓</span>Traverse arrays using <code>foreach</code> with value-only and <code>key => value</code> syntax</li>
+      <li><span class="check">✓</span>Modify arrays: add with <code>array_push</code> / <code>[]</code>, remove with <code>array_pop</code> / <code>unset</code></li>
+      <li><span class="check">✓</span>Apply built-in functions: <code>count</code>, <code>array_sum</code>, <code>sort</code>, <code>rsort</code>, <code>in_array</code>, <code>array_search</code>, <code>array_unique</code>, <code>array_reverse</code>, <code>array_slice</code>, <code>implode</code></li>
+      <li><span class="check">✓</span>Implement bubble sort manually <em>without</em> using <code>sort()</code> and explain why it works</li>
+      <li><span class="check">✓</span>Perform a linear search and return the position of the found element</li>
+      <li><span class="check">✓</span>Solve engineering analysis problems using arrays and loops (mean, max, min, above-average)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">📌 Key rules before you start</div>
+    <div class="alert-box"><strong>🚫 Bubble Sort Rule</strong> In Task 3, you MUST implement bubble sort using nested for loops. Using PHP's <code>sort()</code>, <code>rsort()</code>, or any other built-in sort function is an automatic zero for that section AND triggers an academic integrity flag in the automated check.</div>
+    <div class="info-box warn"><strong>⚠️ Pseudocode First</strong> For Tasks 3 and 4 you must write pseudocode in your PDF report before writing any PHP code. Marks are awarded for all three: pseudocode, flowchart, and working code.</div>
+    <div class="info-box note"><strong>📌 Array Indexing</strong> PHP arrays are zero-indexed. The first element is at index 0, not 1. This matters for bubble sort — your outer loop runs <code>n-1</code> times, not <code>n</code>.</div>
+    <div class="info-box tip"><strong>✅ foreach vs for</strong> Use <code>foreach</code> when you need every element. Use <code>for</code> with an index variable when you need to compare adjacent elements (bubble sort) or track position (linear search).</div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div class="section" id="section-tasks">
+  <div class="section-title"><div class="num">2</div>Lab Tasks</div>
+
+  <div class="task-card">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div class="task-num t1">1</div>
+      <div class="task-meta">
+        <div class="task-name">Array Declaration, Initialisation & Traversal</div>
+        <div class="task-sub">Indexed · Associative · 2D arrays &nbsp;|&nbsp; <code>lab5_task1.php</code></div>
+      </div>
+      <div class="task-marks">6 <span>marks</span></div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="task-body">
+      <div class="card-title">Exercise A — Indexed Array: Module Scores</div>
+      <p>Declare <code>$scores = [72, 45, 88, 63, 91, 57, 84, 39]</code> and complete all steps:</p>
+      <ol>
+        <li>Print with <code>print_r()</code></li>
+        <li>Access and print the 1st, 4th, and last element by index</li>
+        <li>Print total elements using <code>count()</code></li>
+        <li>Traverse with a standard <code>for</code> loop — print each score</li>
+        <li>Traverse with <code>foreach</code> — print <code>"Score N: VALUE"</code></li>
+      </ol>
+
+      <div class="card-title" style="margin-top:16px">Exercise B — Associative Array: Student Record</div>
+      <p>Declare <code>$student</code> with keys: <code>name</code>, <code>reg_number</code>, <code>year</code>, <code>course</code>, <code>gpa</code>. Then:</p>
+      <ol>
+        <li>Print with <code>print_r()</code></li>
+        <li>Access name, reg_number, and gpa individually</li>
+        <li>Update gpa to 3.6 and print the updated value</li>
+        <li>Traverse with <code>foreach ($student as $key => $value)</code> — print every pair</li>
+      </ol>
+
+      <div class="card-title" style="margin-top:16px">Exercise C — 2D Array: Student Cohort</div>
+      <p>Declare a 2D array <code>$cohort</code> with 3 students, each having <code>name</code>, <code>reg_number</code>, and <code>score</code>. Then:</p>
+      <ol>
+        <li>Print with <code>print_r()</code></li>
+        <li>Use nested <code>foreach</code> to print each student on one line</li>
+        <li>Find and print the student with the highest score using a loop comparison — <strong>no built-in max yet</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div class="task-num t2">2</div>
+      <div class="task-meta">
+        <div class="task-name">Built-in Array Functions</div>
+        <div class="task-sub">count · sum · sort · search · manipulation &nbsp;|&nbsp; <code>lab5_task2.php</code></div>
+      </div>
+      <div class="task-marks">5 <span>marks</span></div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="task-body">
+      <p>Base array for Exercises A & B:</p>
+      <span class="code-label">lab5_task2.php</span>
+      <pre><code><span class="var">$temps</span> = [<span class="num">36.5</span>, <span class="num">38.2</span>, <span class="num">37.1</span>, <span class="num">39.4</span>, <span class="num">36.8</span>, <span class="num">40.1</span>, <span class="num">37.9</span>, <span class="num">35.6</span>, <span class="num">38.7</span>, <span class="num">36.2</span>];</code></pre>
+
+      <div class="card-title">Exercise A — Aggregate Functions</div>
+      <ol>
+        <li><code>count()</code> — how many readings?</li>
+        <li><code>array_sum()</code> — total of all readings</li>
+        <li>Compute mean = total / count</li>
+        <li><code>sort()</code> — ascending, print with <code>print_r()</code></li>
+        <li><code>rsort()</code> — descending (re-declare <code>$temps</code> first), print</li>
+      </ol>
+      <div class="info-box warn"><strong>⚠️ Note</strong> <code>sort()</code> and <code>rsort()</code> modify the array in-place and reset keys to 0,1,2... Always re-declare the original array before each sort.</div>
+
+      <div class="card-title" style="margin-top:16px">Exercise B — Search Functions</div>
+      <ol>
+        <li><code>in_array(39.4, $temps)</code> — does it exist?</li>
+        <li><code>in_array(41.0, $temps)</code> — does it exist?</li>
+        <li><code>array_search(40.1, $temps)</code> — what index?</li>
+        <li><code>array_search(99.9, $temps)</code> — what does it return when not found? Explain in your report.</li>
+      </ol>
+
+      <div class="card-title" style="margin-top:16px">Exercise C — Manipulation</div>
+      <p>Array: <code>$fruits = ["mango","banana","orange","mango","apple","banana","pawpaw"]</code></p>
+      <ol>
+        <li><code>array_unique()</code> — remove duplicates</li>
+        <li><code>array_reverse()</code> — reverse order</li>
+        <li><code>array_slice($fruits, 2, 3)</code> — extract 3 elements starting at index 2</li>
+        <li><code>implode(" | ", $fruits)</code> — join as a string</li>
+        <li><code>array_push()</code> — add "passion fruit"</li>
+        <li><code>array_pop()</code> — remove last, print removed value</li>
+      </ol>
+
+      <div class="card-title" style="margin-top:16px">Exercise D — unset() vs array_pop()</div>
+      <p>Array: <code>$items = ["pen","book","ruler","eraser","compass"]</code></p>
+      <ol>
+        <li><code>unset($items[2])</code> — remove "ruler", print array</li>
+        <li>Check keys with <code>array_keys()</code> — are they re-indexed?</li>
+        <li><code>array_values()</code> — re-index and print</li>
+        <li>In your report: explain the difference between <code>unset()</code> and <code>array_pop()</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div class="task-num t3">3</div>
+      <div class="task-meta">
+        <div class="task-name">Bubble Sort & Linear Search</div>
+        <div class="task-sub">Manual implementation — NO sort() allowed &nbsp;|&nbsp; <code>lab5_task3.php</code></div>
+      </div>
+      <div class="task-marks">7 <span>marks</span></div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="task-body">
+      <div class="alert-box"><strong>🚫 Absolutely no sort() or rsort()</strong> Using any built-in PHP sort function in this task is an automatic zero. The automated CI check will flag it immediately.</div>
+      <div class="info-box danger"><strong>🔴 Pseudocode + Flowchart Required</strong> Complete these in your PDF report before writing any code.</div>
+
+      <div class="card-title">Exercise A — Bubble Sort Ascending</div>
+      <p>Array: <code>$numbers = [64, 34, 25, 12, 22, 11, 90]</code></p>
+      <p>Implement using nested <code>for</code> loops. The swap pattern:</p>
+      <span class="code-label">swap pattern</span>
+      <pre><code><span class="kw">if</span> (<span class="var">$arr</span>[<span class="var">$j</span>] > <span class="var">$arr</span>[<span class="var">$j</span>+<span class="num">1</span>]) {
+    <span class="var">$temp</span>         = <span class="var">$arr</span>[<span class="var">$j</span>];
+    <span class="var">$arr</span>[<span class="var">$j</span>]     = <span class="var">$arr</span>[<span class="var">$j</span>+<span class="num">1</span>];
+    <span class="var">$arr</span>[<span class="var">$j</span>+<span class="num">1</span>] = <span class="var">$temp</span>;
+    <span class="var">$swaps</span>++;
+}</code></pre>
+      <p>Print: original array → sorted array → total swaps made.</p>
+
+      <div class="card-title" style="margin-top:16px">Exercise B — Bubble Sort Descending</div>
+      <p>Re-declare <code>$numbers</code> and sort descending. Change only the comparison operator (<code>&gt;</code> becomes <code>&lt;</code>). Explain why in your report.</p>
+
+      <div class="card-title" style="margin-top:16px">Exercise C — Linear Search</div>
+      <p>Array: <code>$dataset = [15, 42, 8, 73, 29, 56, 4, 91, 37, 63]</code></p>
+      <p>Implement a <code>linearSearch($array, $target)</code> function that returns the index (or -1 if not found) AND the number of comparisons made. Do not use <code>in_array()</code> or <code>array_search()</code>.</p>
+      <ol>
+        <li>Search for <code>56</code> — print index and comparisons</li>
+        <li>Search for <code>100</code> — print "Not found" and comparisons</li>
+      </ol>
+
+      <div class="card-title" style="margin-top:16px">Exercise D — Written Analysis (in your report)</div>
+      <ol>
+        <li>How many comparisons does bubble sort make on n=7 elements? Give the formula.</li>
+        <li>What does O(n²) mean? Why is bubble sort slow for large arrays?</li>
+        <li>What is the worst-case comparisons for linear search on n=10?</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header" onclick="toggleTask(this)">
+      <div class="task-num t4">4</div>
+      <div class="task-meta">
+        <div class="task-name">Engineering Analysis — Bridge Sensor Data</div>
+        <div class="task-sub">Mean · Max · Min · Alerts &nbsp;|&nbsp; <code>lab5_task4.php</code></div>
+      </div>
+      <div class="task-marks">7 <span>marks</span></div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="task-body">
+      <div class="info-box danger"><strong>🔴 Pseudocode Required</strong> Write pseudocode in your PDF report before coding.</div>
+      <p>A civil engineering team installed 12 strain sensors on a bridge. Readings in microstrain (µε):</p>
+      <span class="code-label">lab5_task4.php — dataset</span>
+      <pre><code><span class="var">$sensor_readings</span> = [<span class="num">120</span>, <span class="num">85</span>, <span class="num">210</span>, <span class="num">95</span>, <span class="num">180</span>, <span class="num">145</span>, <span class="num">230</span>, <span class="num">110</span>, <span class="num">175</span>, <span class="num">90</span>, <span class="num">205</span>, <span class="num">160</span>];
+<span class="var">$sensor_ids</span>      = [<span class="str">"S01"</span>,<span class="str">"S02"</span>,<span class="str">"S03"</span>,<span class="str">"S04"</span>,<span class="str">"S05"</span>,<span class="str">"S06"</span>,<span class="str">"S07"</span>,<span class="str">"S08"</span>,<span class="str">"S09"</span>,<span class="str">"S10"</span>,<span class="str">"S11"</span>,<span class="str">"S12"</span>];
+<span class="var">$threshold</span>       = <span class="num">190</span>; <span class="com">// safety alert threshold in µε</span></code></pre>
+
+      <div class="card-title" style="margin-top:16px">Step 1 — Basic Statistics (using loops, not built-ins)</div>
+      <p>Compute without <code>array_sum()</code> or built-in min/max: total sum, mean, max reading + which sensor, min reading + which sensor. Then verify your sum with <code>array_sum()</code> — values must match.</p>
+
+      <div class="card-title" style="margin-top:16px">Step 2 — Above-Average Analysis</div>
+      <ol>
+        <li>Count sensors above the mean</li>
+        <li>Build <code>$above_avg</code> array: <code>["S03" => 210, ...]</code> — only above-mean sensors</li>
+        <li>Print with <code>print_r()</code></li>
+      </ol>
+
+      <div class="card-title" style="margin-top:16px">Step 3 — Safety Alert System</div>
+      <p>Traverse with <code>foreach ($sensor_readings as $key => $reading)</code>. For each: if reading > threshold print <code>"ALERT: S0X reading=XXX µε"</code>, otherwise <code>"OK: S0X reading=XXX µε"</code>. Count total alerts.</p>
+
+      <div class="card-title" style="margin-top:16px">Step 4 — Formatted Report</div>
+      <p>Print a clean summary: total sensors, mean, max (sensor + value), min (sensor + value), sensors above average, total alerts, list of alert sensors.</p>
+
+      <div class="card-title" style="margin-top:16px">Required Test Runs — screenshot each</div>
+      <table class="rubric-table">
+        <tr><th>Run</th><th>Threshold</th><th style="text-align:left">Expected</th></tr>
+        <tr><td>A</td><td>190 µε</td><td>3 sensors alert (S03, S07, S11)</td></tr>
+        <tr><td>B</td><td>150 µε</td><td>More sensors alert</td></tr>
+        <tr><td>C</td><td>250 µε</td><td>Zero alerts</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT -->
+<div class="section" id="section-submit">
+  <div class="section-title"><div class="num">3</div>How to Submit</div>
+  <div class="card" style="background:linear-gradient(135deg,#ccfbf1,#dbeafe);border-color:#99f6e4;text-align:center;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
+      <div style="background:white;border-radius:10px;padding:16px;">
+        <div style="font-size:36px;font-family:'Sora',sans-serif;font-weight:800;color:var(--teal);">10</div>
+        <div style="font-weight:700;">GitHub Repo</div>
+        <div style="font-size:13px;color:#64748b;">Code quality, structure, syntax</div>
+      </div>
+      <div style="background:white;border-radius:10px;padding:16px;">
+        <div style="font-size:36px;font-family:'Sora',sans-serif;font-weight:800;color:var(--green);">15</div>
+        <div style="font-weight:700;">iLMS PDF Report</div>
+        <div style="font-size:13px;color:#64748b;">Pseudocode, flowcharts, screenshots</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:28px;font-size:18px;"><div class="num" style="background:var(--purple);">A</div>GitHub (10 marks)</div>
+  <ol class="step-list">
+    <li class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Fork the repo</strong><p>Go to the lab repo and click Fork.</p><a href="https://github.com/Kiotolabs/lab5-arrays" target="_blank" class="cta-btn" style="margin-top:10px;font-size:13px;padding:10px 18px;">🔗 Open Lab 5 Repo</a></div></li>
+    <li class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Clone your fork</strong>
+      <div class="cmd" onclick="copyCmd(this)">git clone https://github.com/YOUR_USERNAME/lab5-arrays.git <span class="copy-hint">click to copy</span></div>
+      <div class="cmd" onclick="copyCmd(this)">cd lab5-arrays <span class="copy-hint">click to copy</span></div>
+    </div></li>
+    <li class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Complete all 4 task files in starter/</strong><p>Replace all <code>[Your Name]</code> and <code>[Your Reg Number]</code> placeholders.</p></div></li>
+    <li class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Commit and push</strong>
+      <div class="cmd" onclick="copyCmd(this)">git add . <span class="copy-hint">click to copy</span></div>
+      <div class="cmd" onclick="copyCmd(this)">git commit -m "feat: lab5 complete - SCT212-XXXX/2024" <span class="copy-hint">click to copy</span></div>
+      <div class="cmd" onclick="copyCmd(this)">git push origin main <span class="copy-hint">click to copy</span></div>
+    </div></li>
+    <li class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Open a Pull Request</strong><p>Fork → Contribute → Open Pull Request → fill in every field → submit. After the lecturer merges your PR, a <strong>RESULT.md</strong> file will automatically appear on your fork showing your repo score.</p></div></li>
+  </ol>
+
+  <div class="section-title" style="margin-top:28px;font-size:18px;"><div class="num" style="background:var(--green);">B</div>iLMS Report (15 marks)</div>
+  <ol class="step-list">
+    <li class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Write pseudocode for Tasks 3 and 4</strong><p>Bubble sort must show nested loop structure and swap mechanism clearly.</p></div></li>
+    <li class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Draw flowcharts for Tasks 3 and 4</strong><p>Show inner and outer loops for bubble sort. All branches for Task 4 alert system.</p></div></li>
+    <li class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Capture all screenshots</strong><p>Every exercise across all 4 tasks. Task 4 needs all 3 threshold runs.</p></div></li>
+    <li class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Include your GitHub PR link on the cover page</strong></div></li>
+    <li class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Upload to iLMS</strong><a class="cta-btn green" href="#" style="margin-top:10px;font-size:13px;padding:10px 18px;">📤 Go to iLMS Assignment</a></div></li>
+  </ol>
+</div>
+
+<!-- RUBRIC -->
+<div class="section" id="section-rubric">
+  <div class="section-title"><div class="num">4</div>Marks Breakdown</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="rubric-table">
+      <thead><tr><th>Criterion</th><th>Detail</th><th>Marks</th></tr></thead>
+      <tbody>
+        <tr class="rubric-section-head"><td colspan="3">Track A — GitHub Repo (auto-checked)</td></tr>
+        <tr><td>Required files present</td><td>All 4 task files with correct names</td><td class="marks-cell">2</td></tr>
+        <tr><td>PHP syntax valid</td><td>All files pass <code>php -l</code></td><td class="marks-cell">3</td></tr>
+        <tr><td>File headers correct</td><td><code>@student</code> reg number in every file</td><td class="marks-cell">1</td></tr>
+        <tr><td>Commit message format</td><td><code>feat: lab5 complete - REGNO/YEAR</code></td><td class="marks-cell">1</td></tr>
+        <tr><td>Code structure markers</td><td>TODO stubs worked on</td><td class="marks-cell">2</td></tr>
+        <tr><td>PR template filled</td><td>All PR fields completed</td><td class="marks-cell">1</td></tr>
+        <tr class="rubric-section-head"><td colspan="3">Track B — iLMS PDF Report (AI-graded)</td></tr>
+        <tr><td>Pseudocode — bubble sort</td><td>Nested loop logic, swap mechanism shown</td><td class="marks-cell">3</td></tr>
+        <tr><td>Flowchart — bubble sort</td><td>Inner and outer loop, correct symbols</td><td class="marks-cell">2</td></tr>
+        <tr><td>Pseudocode — Task 4 analysis</td><td>Mean, max, min, above-average logic</td><td class="marks-cell">2</td></tr>
+        <tr><td>Screenshots — Tasks 1 & 2</td><td>All exercises with correct output</td><td class="marks-cell">4</td></tr>
+        <tr><td>Screenshots — Tasks 3 & 4</td><td>Sort, search, all 3 threshold runs</td><td class="marks-cell">3</td></tr>
+        <tr><td>GitHub PR link</td><td>Working link on report cover</td><td class="marks-cell">1</td></tr>
+        <tr class="total-row"><td colspan="2"><strong>Total</strong></td><td class="marks-cell">25</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="alert-box" style="margin-top:16px"><strong>Academic integrity — Bubble Sort</strong> Using <code>sort()</code> in Task 3 = zero marks for that section. The automated CI check detects this and flags the submission. Your RESULT.md will reflect it.</div>
+</div>
+
+<!-- CHEAT SHEET -->
+<div class="section" id="section-cheatsheet">
+  <div class="section-title"><div class="num">5</div>PHP Arrays Quick Reference</div>
+  <div class="cheat-grid">
+    <div class="card">
+      <div class="card-title">Declaring arrays</div>
+      <span class="code-label">indexed & associative</span>
+      <pre><code><span class="com">// Indexed</span>
+<span class="var">$scores</span> = [<span class="num">72</span>, <span class="num">45</span>, <span class="num">88</span>, <span class="num">63</span>];
+<span class="fn">echo</span> <span class="var">$scores</span>[<span class="num">0</span>]; <span class="com">// 72</span>
+
+<span class="com">// Associative</span>
+<span class="var">$student</span> = [
+    <span class="str">"name"</span> => <span class="str">"Jane"</span>,
+    <span class="str">"gpa"</span>  => <span class="num">3.4</span>
+];
+<span class="fn">echo</span> <span class="var">$student</span>[<span class="str">"name"</span>];</code></pre>
+    </div>
+    <div class="card">
+      <div class="card-title">foreach syntax</div>
+      <span class="code-label">value-only & key=>value</span>
+      <pre><code><span class="com">// Value only</span>
+<span class="kw">foreach</span> (<span class="var">$scores</span> <span class="kw">as</span> <span class="var">$score</span>) {
+    <span class="fn">echo</span> <span class="var">$score</span> . <span class="str">"&lt;br&gt;"</span>;
+}
+
+<span class="com">// Key => value</span>
+<span class="kw">foreach</span> (<span class="var">$student</span> <span class="kw">as</span> <span class="var">$key</span> => <span class="var">$val</span>) {
+    <span class="fn">echo</span> <span class="str">"<span class="var">$key</span>: <span class="var">$val</span>&lt;br&gt;"</span>;
+}</code></pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Add & remove elements</div>
+      <span class="code-label">push, pop, unset</span>
+      <pre><code><span class="com">// Add to end</span>
+<span class="fn">array_push</span>(<span class="var">$arr</span>, <span class="str">"new"</span>);
+<span class="var">$arr</span>[] = <span class="str">"also new"</span>;
+
+<span class="com">// Remove from end</span>
+<span class="var">$removed</span> = <span class="fn">array_pop</span>(<span class="var">$arr</span>);
+
+<span class="com">// Remove by index (gaps keys)</span>
+<span class="kw">unset</span>(<span class="var">$arr</span>[<span class="num">2</span>]);
+
+<span class="com">// Re-index after unset</span>
+<span class="var">$arr</span> = <span class="fn">array_values</span>(<span class="var">$arr</span>);</code></pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Aggregate functions</div>
+      <span class="code-label">count, sum, sort</span>
+      <pre><code><span class="fn">count</span>(<span class="var">$arr</span>);       <span class="com">// number of elements</span>
+<span class="fn">array_sum</span>(<span class="var">$arr</span>);   <span class="com">// sum of all values</span>
+<span class="fn">sort</span>(<span class="var">$arr</span>);        <span class="com">// sort ascending (in-place)</span>
+<span class="fn">rsort</span>(<span class="var">$arr</span>);       <span class="com">// sort descending (in-place)</span>
+
+<span class="com">// Mean</span>
+<span class="var">$mean</span> = <span class="fn">array_sum</span>(<span class="var">$arr</span>) / <span class="fn">count</span>(<span class="var">$arr</span>);</code></pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Search functions</div>
+      <span class="code-label">in_array, array_search</span>
+      <pre><code><span class="com">// Check existence (returns bool)</span>
+<span class="fn">in_array</span>(<span class="num">39.4</span>, <span class="var">$temps</span>);  <span class="com">// true/false</span>
+
+<span class="com">// Find index (returns index or false)</span>
+<span class="var">$idx</span> = <span class="fn">array_search</span>(<span class="num">40.1</span>, <span class="var">$temps</span>);
+
+<span class="com">// Always check with === not ==</span>
+<span class="kw">if</span> (<span class="var">$idx</span> === <span class="kw">false</span>) {
+    <span class="fn">echo</span> <span class="str">"Not found"</span>;
+}</code></pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Utility functions</div>
+      <span class="code-label">unique, reverse, slice, implode</span>
+      <pre><code><span class="fn">array_unique</span>(<span class="var">$arr</span>);         <span class="com">// remove dupes</span>
+<span class="fn">array_reverse</span>(<span class="var">$arr</span>);        <span class="com">// reverse order</span>
+<span class="fn">array_slice</span>(<span class="var">$arr</span>, <span class="num">2</span>, <span class="num">3</span>);    <span class="com">// extract 3 from idx 2</span>
+<span class="fn">implode</span>(<span class="str">" | "</span>, <span class="var">$arr</span>);       <span class="com">// join as string</span>
+<span class="fn">array_keys</span>(<span class="var">$arr</span>);           <span class="com">// all keys</span>
+<span class="fn">array_values</span>(<span class="var">$arr</span>);         <span class="com">// re-index</span></code></pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Bubble sort pattern</div>
+      <span class="code-label">manual — nested for loops</span>
+      <pre><code><span class="var">$n</span> = <span class="fn">count</span>(<span class="var">$arr</span>);
+<span class="kw">for</span> (<span class="var">$i</span>=<span class="num">0</span>; <span class="var">$i</span> < <span class="var">$n</span>-<span class="num">1</span>; <span class="var">$i</span>++) {
+  <span class="kw">for</span> (<span class="var">$j</span>=<span class="num">0</span>; <span class="var">$j</span> < <span class="var">$n</span>-<span class="num">1</span>-<span class="var">$i</span>; <span class="var">$j</span>++) {
+    <span class="kw">if</span> (<span class="var">$arr</span>[<span class="var">$j</span>] > <span class="var">$arr</span>[<span class="var">$j</span>+<span class="num">1</span>]) {
+      <span class="var">$t</span>          = <span class="var">$arr</span>[<span class="var">$j</span>];
+      <span class="var">$arr</span>[<span class="var">$j</span>]   = <span class="var">$arr</span>[<span class="var">$j</span>+<span class="num">1</span>];
+      <span class="var">$arr</span>[<span class="var">$j</span>+<span class="num">1</span>] = <span class="var">$t</span>;
+    }
+  }
+}</code></pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Linear search pattern</div>
+      <span class="code-label">manual — return index or -1</span>
+      <pre><code><span class="kw">function</span> <span class="fn">linearSearch</span>(<span class="var">$arr</span>, <span class="var">$target</span>) {
+  <span class="var">$comparisons</span> = <span class="num">0</span>;
+  <span class="kw">for</span> (<span class="var">$i</span>=<span class="num">0</span>; <span class="var">$i</span> < <span class="fn">count</span>(<span class="var">$arr</span>); <span class="var">$i</span>++) {
+    <span class="var">$comparisons</span>++;
+    <span class="kw">if</span> (<span class="var">$arr</span>[<span class="var">$i</span>] === <span class="var">$target</span>) {
+      <span class="kw">return</span> [<span class="str">"index"</span> => <span class="var">$i</span>,
+              <span class="str">"comparisons"</span> => <span class="var">$comparisons</span>];
+    }
+  }
+  <span class="kw">return</span> [<span class="str">"index"</span> => -<span class="num">1</span>,
+          <span class="str">"comparisons"</span> => <span class="var">$comparisons</span>];
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="section" id="section-checklist">
+  <div class="section-title"><div class="num">6</div>My Submission Checklist</div>
+  <div class="card">
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">0 / 20 complete</div>
+  </div>
+  <div class="card">
+    <div class="card-title">💻 Code — GitHub Track</div>
+    <ul class="checklist">
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Forked the repo to my GitHub account</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Cloned my fork locally</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Completed <code>lab5_task1.php</code> — all 3 exercises (A, B, C)</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Completed <code>lab5_task2.php</code> — all 4 exercises (A, B, C, D)</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Completed <code>lab5_task3.php</code> — bubble sort (NO sort()) and linear search</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Completed <code>lab5_task4.php</code> — engineering analysis all 3 threshold runs</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Replaced all <code>[Your Name]</code> and <code>[Your Reg Number]</code> placeholders</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Committed with: <code>feat: lab5 complete - REGNO/YEAR</code></span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Pushed to my fork and opened a Pull Request</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>PR template fully filled in</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>CI check shows green (clicked Details to verify)</span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">📄 Report — iLMS Track</div>
+    <ul class="checklist">
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Pseudocode written for bubble sort (Task 3)</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Flowchart drawn for bubble sort (inner + outer loop visible)</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Pseudocode written for Task 4 engineering analysis</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>All Task 1 screenshots captured</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>All Task 2 screenshots captured</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Task 3 — sort ascending, descending, search found, search not found</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Task 4 — all 3 threshold runs (190, 150, 250) screenshotted</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>Written analysis for Exercise D (efficiency comparison) included</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>GitHub PR link on report cover page</span></li>
+      <li onclick="toggleCheck(this)"><span class="box"></span><span>PDF uploaded to iLMS before deadline</span></li>
+    </ul>
+  </div>
+  <div class="card" style="background:linear-gradient(135deg,#ccfbf1,#dbeafe);border-color:#6ee7b7;text-align:center;padding:32px;">
+    <div style="font-size:40px;margin-bottom:8px;">🎉</div>
+    <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:18px;margin-bottom:8px;">All done!</div>
+    <div style="font-size:14px;color:#475569;">Both submissions complete. After your PR is merged, check your fork for <strong>RESULT.md</strong> — your automated repo score will be there.</div>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer">
+  <strong>ICS 2371 — Structured Programming</strong> · Jomo Kenyatta University of Agriculture & Technology · Lab 5 of 14 ·
+  <a href="https://github.com/Kiotolabs" target="_blank" style="color:#6ee7b7;">github.com/Kiotolabs</a>
+</footer>
+
+<script>
+  function showTab(id){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('section-'+id).classList.add('active');
+    event.currentTarget.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function toggleTask(header){
+    const body=header.nextElementSibling;
+    const isOpen=body.classList.contains('open');
+    body.classList.toggle('open',!isOpen);
+    header.classList.toggle('open',!isOpen);
+  }
+  function copyCmd(el){
+    const text=el.textContent.replace('click to copy','').trim();
+    navigator.clipboard.writeText(text).catch(()=>{});
+    const hint=el.querySelector('.copy-hint');
+    if(hint){hint.textContent='copied!';setTimeout(()=>{hint.textContent='click to copy';},1500);}
+  }
+  function toggleCheck(li){
+    li.classList.toggle('checked');
+    li.querySelector('.box').textContent=li.classList.contains('checked')?'✓':'';
+    updateProgress();
+  }
+  function updateProgress(){
+    const all=document.querySelectorAll('.checklist li');
+    const done=document.querySelectorAll('.checklist li.checked').length;
+    const pct=Math.round((done/all.length)*100);
+    document.getElementById('progress-bar').style.width=pct+'%';
+    document.getElementById('progress-label').textContent=done+' / '+all.length+' complete';
+  }
+</script>
+</body>
+</html>
